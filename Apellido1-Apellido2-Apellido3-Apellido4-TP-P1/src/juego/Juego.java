@@ -35,7 +35,7 @@ public class Juego extends InterfaceJuego
 	public void tick()
 	{
 		// Procesamiento de un instante de tiempo
-		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0);
+		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.2); //El ultimo parametro es para la escala. Entre 0 y 1, se achica la imagen
 		
 	}
 	
