@@ -36,7 +36,24 @@ public class Juego extends InterfaceJuego
 	{
 		// Procesamiento de un instante de tiempo
 		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.2); //El ultimo parametro es para la escala. Entre 0 y 1, se achica la imagen
+		entorno.dibujarImagen(caballero.getImagenCaballero(), caballero.getXcaballero(), caballero.getYcaballero(), 0, 0.1);
 		
+		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
+		boolean estaPresionadaIzquierda = entorno.estaPresionada(entorno.TECLA_IZQUIERDA);
+
+		if(estaPresionadaDerecha){
+			caballero.moverDerecha();
+		}
+		if (estaPresionadaIzquierda) {
+			caballero.moverIzquierda();
+		}
+		if (entorno.estaPresionada(entorno.TECLA_ESPACIO)) {
+			
+			do {
+				caballero.caer();
+			} while (caballero.getYcaballero() >= 500);
+		}
+	}
 	}
 	
 
