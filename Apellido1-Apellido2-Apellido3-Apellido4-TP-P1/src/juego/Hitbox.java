@@ -1,4 +1,9 @@
-
+/**
+* Estoy viendo todabia si dejar o no esta clase. Basicamente la idea de la clase es que a partir de la posicion, alto y ancho de la imagen
+* se cree una hitbox invisible, que no es mas que un rectangulo dibujado sin contorno ni color.
+* Realmente no es completamente necesario esta clase, ya que se puede usar el mismo ancho y alto de la imagen de la isla como limite de colicion.
+* 
+*/
 
 package juego;
 
