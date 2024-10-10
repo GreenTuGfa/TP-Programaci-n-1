@@ -13,6 +13,8 @@ public class Juego extends InterfaceJuego
 	
 	// Variables y métodos propios de cada grupo
 	public Isla isla;
+	public Caballero caballero;
+	public Hitbox hitboxIsla;
 	
 	Juego()
 	{
@@ -20,8 +22,10 @@ public class Juego extends InterfaceJuego
 		this.entorno = new Entorno(this, "Al Rescate de los Gnomos", 800, 600);
 		
 		// Inicializar lo que haga falta para el juego
-		isla = new Isla(10, 10, "images/bloque.jpg");
 
+		isla = new Isla(100, 550, "images/isla1.jpg");
+		caballero = new Caballero(100, 100, 5,"images/caballero.png");
+		hitboxIsla = new Hitbox(isla.getX(), isla.getY(),300,50);
 		// Inicia el juego!
 		this.entorno.iniciar();
 	}
@@ -35,7 +39,10 @@ public class Juego extends InterfaceJuego
 	public void tick()
 	{
 		// Procesamiento de un instante de tiempo
-		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.5);
+
+		//Se multiplica el alto y ancho de la hitbox por 0.5, para achicarlo a la misma altura de la imagen de la isla. La imagen de la isla tambien se multiplica por 0.5 para ahicarla
+		entorno.dibujarRectangulo(hitboxIsla.getX(), hitboxIsla.getY(), hitboxIsla.getAncho()*0.5, hitboxIsla.getAlto()*0.5, 0, Color.BLUE); 
+		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.5); //0.5 es el valor por el que se multiplica el alto y ancho de la imagen para que se achique
 		entorno.dibujarImagen(caballero.getImagenCaballero(), caballero.getXcaballero(), caballero.getYcaballero(), 0, 0.1);
 		
 		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
@@ -56,14 +63,16 @@ public class Juego extends InterfaceJuego
 		}
 	}
 
-	//Este metodo falta desarrolarlo para que detecte todos los bordes de la isla
+	//Este metodo no deben darle demasiada bola por que todavia no esta del todo bien hecho
 	public boolean colicionoConIsla(){
-		if(caballero.getYcaballero() == isla.getY() - 50){
+		if(caballero.getYcaballero() == hitboxIsla.getY()-hitboxIsla.getAlto()){
 			return true;
 		}else{
 			return false;
 		}
 	}
+	
+
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
