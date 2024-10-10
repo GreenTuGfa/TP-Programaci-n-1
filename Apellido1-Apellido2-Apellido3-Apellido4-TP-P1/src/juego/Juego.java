@@ -35,7 +35,7 @@ public class Juego extends InterfaceJuego
 	public void tick()
 	{
 		// Procesamiento de un instante de tiempo
-		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.2); //El ultimo parametro es para la escala. Entre 0 y 1, se achica la imagen
+		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.5);
 		entorno.dibujarImagen(caballero.getImagenCaballero(), caballero.getXcaballero(), caballero.getYcaballero(), 0, 0.1);
 		
 		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
@@ -49,14 +49,21 @@ public class Juego extends InterfaceJuego
 		}
 		if (entorno.estaPresionada(entorno.TECLA_ESPACIO)) {
 			
-			do {
-				caballero.caer();
-			} while (caballero.getYcaballero() >= 500);
+			caballero.saltar();
+		}
+		if(colicionoConIsla() != true){
+			caballero.caer();
 		}
 	}
-	}
-	
 
+	//Este metodo falta desarrolarlo para que detecte todos los bordes de la isla
+	public boolean colicionoConIsla(){
+		if(caballero.getYcaballero() == isla.getY() - 50){
+			return true;
+		}else{
+			return false;
+		}
+	}
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
