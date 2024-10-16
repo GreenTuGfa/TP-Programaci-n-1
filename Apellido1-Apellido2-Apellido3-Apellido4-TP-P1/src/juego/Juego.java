@@ -1,7 +1,7 @@
 package juego;
 
 
-import java.awt.Color;
+//import java.awt.Color;
 
 import entorno.Entorno;
 import entorno.InterfaceJuego;
@@ -14,8 +14,6 @@ public class Juego extends InterfaceJuego
 	// Variables y métodos propios de cada grupo
 	public Isla isla;
 	public Caballero caballero;
-	public Hitbox hitboxIsla;
-	
 	Juego()
 	{
 		// Inicializa el objeto entorno
@@ -23,9 +21,10 @@ public class Juego extends InterfaceJuego
 		
 		// Inicializar lo que haga falta para el juego
 
-		isla = new Isla(100, 550, "images/isla1.jpg");
-		caballero = new Caballero(100, 100, 5,"images/caballero.png");
-		hitboxIsla = new Hitbox(isla.getX(), isla.getY(),300,50);
+		isla = new Isla(200, 550,200,50);
+		caballero = new Caballero(100, 50, 5,30,50);
+		//hitboxIsla = new Hitbox(200, 550,200,50);
+		//hitboxCaballero = new Hitbox(100, 50, 30, 30);
 		// Inicia el juego!
 		this.entorno.iniciar();
 	}
@@ -40,10 +39,8 @@ public class Juego extends InterfaceJuego
 	{
 		// Procesamiento de un instante de tiempo
 
-		//Se multiplica el alto y ancho de la hitbox por 0.5, para achicarlo a la misma altura de la imagen de la isla. La imagen de la isla tambien se multiplica por 0.5 para ahicarla
-		entorno.dibujarRectangulo(hitboxIsla.getX(), hitboxIsla.getY(), hitboxIsla.getAncho()*0.5, hitboxIsla.getAlto()*0.5, 0, Color.BLUE); 
-		entorno.dibujarImagen(isla.getImagenIsla(), isla.getX(), isla.getY(), 0,0.5); //0.5 es el valor por el que se multiplica el alto y ancho de la imagen para que se achique
-		entorno.dibujarImagen(caballero.getImagenCaballero(), caballero.getXcaballero(), caballero.getYcaballero(), 0, 0.1);
+		caballero.dibujarCaballero(entorno);
+		isla.dibujarIsla(entorno);
 		
 		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
 		boolean estaPresionadaIzquierda = entorno.estaPresionada(entorno.TECLA_IZQUIERDA);
@@ -58,17 +55,17 @@ public class Juego extends InterfaceJuego
 			
 			caballero.saltar();
 		}
-		if(colicionoConIsla() != true){
+
+		/**
+		 * Siempre que el caballero no este tocando el suelo, caera automaticamente al vacio.
+		 *  Osea que el caballero siempre esta "cayendo". Es su movimiento por defecto, hasta que toca toca el suelo.
+		 */
+		if(caballero.tocaAbajo(isla) == false){
 			caballero.caer();
 		}
-	}
-
-	//Este metodo no deben darle demasiada bola por que todavia no esta del todo bien hecho
-	public boolean colicionoConIsla(){
-		if(caballero.getYcaballero() == hitboxIsla.getY()-hitboxIsla.getAlto()){
-			return true;
-		}else{
-			return false;
+		//En proceso...
+		if(caballero.tocaCostado(isla) && (estaPresionadaDerecha || estaPresionadaIzquierda)){
+			
 		}
 	}
 	

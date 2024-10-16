@@ -1,20 +1,25 @@
 package juego;
 
+import java.awt.Color;
 import java.awt.Image;
 
-import entorno.Herramientas;
+import entorno.Entorno;
 
 public class Caballero {
+
+    BolaDeFuego bolaDeFuego;
     private Image imagenCaballero;
-    
+    public int alto,ancho;
     private int x,y;
     private int velocidad;
 
-    public Caballero(int x, int y, int velocidad,String rutaImagen){
+    public Caballero(int x, int y, int velocidad,int ancho, int alto){
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
-        this.imagenCaballero = Herramientas.cargarImagen(rutaImagen);
+        this.ancho = ancho;
+        this.alto = alto;
+        
     }
 
     public void moverDerecha(){
@@ -30,16 +35,31 @@ public class Caballero {
         
         this.y = this.y + velocidad;
     }
+    public boolean tocaAbajo(Isla isla){
+        boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
+        boolean tocaY = this.y + this.alto/2 == isla.getY() - isla.getAlto()/2;
+        return tocaY && tocaX;
+    }
+    //En proceso...
+    public boolean tocaCostado(Isla isla){
+        boolean tocaDerecha = this.x - this.ancho/2 == isla.getX() + isla.getAncho()/2;
+        boolean tocaIzquierda = this.x + this.ancho/2 == isla.getX() + isla.getAncho()/2;
+        return tocaDerecha || tocaIzquierda;
+    }
 
-    //Setter y Getter
+    public void dibujarCaballero(Entorno entorno){
+        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
+    }
+
+    ////////Setter y Getter///////
     //Getters
-    public int getXcaballero(){
+    public int getX(){
         return this.x;
     }
-    public int getYcaballero(){
+    public int getY(){
         return this.y;
     }
-    public int getVelocidadCaballero(){
+    public int getVelocidad(){
         return this.velocidad;
     }
     public Image getImagenCaballero(){
@@ -47,13 +67,13 @@ public class Caballero {
     }
 
     //Setters
-    public void setXcaballero(int x){
+    public void setX(int x){
         this.x = x;
     }
-    public void setycaballero(int y){
+    public void setY(int y){
         this.y = y;
     }
-    public void setVelocidadCaballero(int velocidad){
+    public void setVelocidad(int velocidad){
         this.velocidad = velocidad;
     }
 }
