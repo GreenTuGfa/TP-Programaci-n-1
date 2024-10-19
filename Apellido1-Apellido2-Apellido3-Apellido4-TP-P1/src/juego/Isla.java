@@ -5,7 +5,6 @@ import java.awt.Image;
 
 import entorno.Entorno;
 
-
 public class Isla {
     
     private Image imagenIsla;
@@ -44,5 +43,4 @@ public class Isla {
     public int getAlto(){
         return this.alto;
     }
-    
 }

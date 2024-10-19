@@ -1,25 +1,21 @@
 package juego;
 
 import java.awt.Color;
-import java.awt.Image;
-
+//import java.awt.Image;
 import entorno.Entorno;
 
-public class Caballero {
+public class Esqueleto {
     
-    public BolaDeFuego boladefuego;
-    private Image imagenCaballero;
-    public int alto,ancho;
     private int x,y;
+    private int ancho,alto;
     private int velocidad;
 
-    public Caballero(int x, int y, int velocidad,int ancho, int alto){
+    public Esqueleto(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
         this.y = y;
-        this.velocidad = velocidad;
         this.ancho = ancho;
         this.alto = alto;
-        
+        this.velocidad = velocidad;
     }
 
     public void moverDerecha(){
@@ -29,29 +25,29 @@ public class Caballero {
         this.x = this.x - velocidad;
     }
     public void saltar(){
-        this.y = this.y - velocidad*2;
+        this.y = this.y - velocidad;
     }
     public void caer(){
         
-        this.y = this.y + velocidad*2;
+        this.y = this.y + velocidad;
+    }
+    public void mover(){
+        this.x = this.x + this.velocidad;
+    }
+    public void cambiarDireccion(){
+        this.velocidad = this.velocidad *(-1);
     }
     public boolean tocaAbajo(Isla isla){
         boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
         boolean tocaY = this.y + this.alto/2 == isla.getY() - isla.getAlto()/2;
         return tocaY && tocaX;
     }
-    //En proceso...
-    public boolean tocaCostado(Isla isla){
-        boolean tocaDerecha = this.x - this.ancho/2 == isla.getX() + isla.getAncho()/2;
-        boolean tocaIzquierda = this.x + this.ancho/2 == isla.getX() + isla.getAncho()/2;
-        return tocaDerecha || tocaIzquierda;
+
+    public void dibujarEsqueleto(Entorno entorno){
+        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.WHITE);
     }
 
-    public void dibujarCaballero(Entorno entorno){
-        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
-    }
-
-    ////////Setter y Getter///////
+    //Setter y Getters
     //Getters
     public int getX(){
         return this.x;
@@ -62,9 +58,13 @@ public class Caballero {
     public int getVelocidad(){
         return this.velocidad;
     }
-    public Image getImagenCaballero(){
-        return this.imagenCaballero;
+    public int getAncho(){
+        return this.ancho;
     }
+    public int getAlto(){
+        return this.alto;
+    }
+    
 
     //Setters
     public void setX(int x){
