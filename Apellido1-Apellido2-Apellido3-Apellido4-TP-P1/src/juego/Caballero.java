@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Image;
 
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Caballero {
     
@@ -19,6 +20,7 @@ public class Caballero {
         this.velocidad = velocidad;
         this.ancho = ancho;
         this.alto = alto;
+        this.imagenCaballero = Herramientas.cargarImagen("images/caballero.png");
         
     }
 
@@ -49,6 +51,7 @@ public class Caballero {
 
     public void dibujarCaballero(Entorno entorno){
         entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
+        //entorno.dibujarImagen(this.imagenCaballero, this.x, this.y, 0, 0.1);
     }
 
     ////////Setter y Getter///////

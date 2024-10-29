@@ -17,6 +17,10 @@ public class Moneda {
         this.alto = alto;
         this.velocidad = velocidad;
     }
+    public void caer(){
+        
+        this.y = this.y + velocidad;
+    }
     public void mover(){
         this.x = this.x + this.velocidad;
     }

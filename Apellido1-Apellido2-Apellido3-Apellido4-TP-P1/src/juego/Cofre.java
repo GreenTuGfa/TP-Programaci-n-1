@@ -5,6 +5,8 @@ import java.awt.Color;
 import entorno.Entorno;
 
 public class Cofre {
+
+    public Moneda[] monedas = new Moneda[4];
     private int x,y;
     private int ancho,alto;
 
@@ -15,6 +17,9 @@ public class Cofre {
         this.alto = alto;
     }
 
+    public void generarMoneda(){
+
+    }
     public void dibujarCofre(Entorno entorno){
         entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.GREEN);
     }

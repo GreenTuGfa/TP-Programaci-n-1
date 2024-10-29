@@ -1,21 +1,23 @@
 package juego;
 
 import java.awt.Color;
-//import java.awt.Image;
+import java.awt.Image;
 import entorno.Entorno;
+import entorno.Herramientas;
 
 public class Esqueleto {
     
     private int x,y;
     private int ancho,alto;
     private int velocidad;
-
+    Image imagenEsqueleto;
     public Esqueleto(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
         this.y = y;
         this.ancho = ancho;
         this.alto = alto;
         this.velocidad = velocidad;
+        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto.png");
     }
 
     public void moverDerecha(){
@@ -35,6 +37,7 @@ public class Esqueleto {
         this.x = this.x + this.velocidad;
     }
     public void cambiarDireccion(){
+        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto1.jpg");
         this.velocidad = this.velocidad *(-1);
     }
     public boolean tocaAbajo(Isla isla){
