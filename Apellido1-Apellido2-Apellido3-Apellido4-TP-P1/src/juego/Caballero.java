@@ -42,12 +42,6 @@ public class Caballero {
         boolean tocaY = this.y + this.alto/2 == isla.getY() - isla.getAlto()/2;
         return tocaY && tocaX;
     }
-    //En proceso...
-    public boolean tocaCostado(Isla isla){
-        boolean tocaDerecha = this.x - this.ancho/2 == isla.getX() + isla.getAncho()/2;
-        boolean tocaIzquierda = this.x + this.ancho/2 == isla.getX() + isla.getAncho()/2;
-        return tocaDerecha || tocaIzquierda;
-    }
 
     public void dibujarCaballero(Entorno entorno){
         entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);

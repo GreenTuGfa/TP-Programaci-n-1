@@ -27,6 +27,11 @@ public class Moneda {
     public void cambiarDireccion(){
         this.velocidad = this.velocidad *(-1);
     }
+    public boolean tocaAbajo(Isla isla){
+        boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
+        boolean tocaY = this.y + this.alto/2 == isla.getY() - isla.getAlto()/2;
+        return tocaY && tocaX;
+    }
     public void dibujarMoneda(Entorno entorno){
         entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.YELLOW);
     }

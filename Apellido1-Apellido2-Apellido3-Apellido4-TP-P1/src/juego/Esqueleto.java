@@ -20,12 +20,6 @@ public class Esqueleto {
         this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto.png");
     }
 
-    public void moverDerecha(){
-        this.x = this.x + velocidad;
-    }
-    public void moverIzquierda(){
-        this.x = this.x - velocidad;
-    }
     public void saltar(){
         this.y = this.y - velocidad;
     }

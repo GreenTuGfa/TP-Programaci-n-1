@@ -6,9 +6,9 @@ import entorno.Entorno;
 
 public class Cofre {
 
-    public Moneda[] monedas = new Moneda[4];
-    private int x,y;
-    private int ancho,alto;
+    
+    public int x,y;
+    public int ancho,alto;
 
     public Cofre(int x, int y, int ancho, int alto){
         this.x = x;

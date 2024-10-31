@@ -11,9 +11,11 @@ public class Juego extends InterfaceJuego
 	// Variables y métodos propios de cada grupo
 	Cofre cofre;
 	public BolaDeFuego boladefuego;
+	public Moneda[] monedas = new Moneda[3];
 	public Isla[] islas = new Isla[15];
 	public Caballero caballero;
 	public Esqueleto esqueleto;
+	public Esqueleto[] esqueletos = new Esqueleto[3];
 	boolean confirmar = false;
 
 	int yCaballero = 0;
@@ -23,11 +25,18 @@ public class Juego extends InterfaceJuego
 		this.entorno = new Entorno(this, "Al Rescate de los Gnomos", 800, 600);
 		
 		// Inicializar lo que haga falta para el juego
+		esqueletos[0] = new Esqueleto(150,100,20,30,5);
+		esqueletos[1] = new Esqueleto(300,100,20,30,5);
+		esqueletos[2] = new Esqueleto(500,100,20,30,5);
+
+		monedas[0] = new Moneda(150, 100, 12, 12, 1);
+		monedas[1] = new Moneda(300, 100, 12, 12, 1);
+		monedas[2] = new Moneda(500, 100, 12, 12, 1);
 
 		generarIslas();
 		cofre = new Cofre(400,50,30,30);
 		caballero = new Caballero(100, 50, 5,20,30);
-		esqueleto = new Esqueleto(150, 100, 20, 30, 5);
+		//esqueleto = new Esqueleto(150, 100, 20, 30, 5);
 
 		//hitboxIsla = new Hitbox(200, 550,200,50);
 		//hitboxCaballero = new Hitbox(100, 50, 30, 30);
@@ -45,9 +54,12 @@ public class Juego extends InterfaceJuego
 	public void tick()
 	{
 		// Procesamiento de un instante de tiempo
+		
+		dibujarMonedas(monedas);
+		dibujarEsqueletos(esqueletos);
 		dibujarIslas(islas);
 		cofre.dibujarCofre(entorno);
-		esqueleto.dibujarEsqueleto(entorno);
+		//esqueleto.dibujarEsqueleto(entorno);
 		caballero.dibujarCaballero(entorno);
 
 
@@ -55,20 +67,34 @@ public class Juego extends InterfaceJuego
 
 		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
 		boolean estaPresionadaIzquierda = entorno.estaPresionada(entorno.TECLA_IZQUIERDA);
+		
 
-		if(esqueletoEstaTocandoAlgunaIsla(islas) != null){
-			Isla isla = esqueletoEstaTocandoAlgunaIsla(islas); //Guarda la isla que el esqueleto toco
-
-			boolean tocaDerecha = esqueleto.getX() + esqueleto.getAncho()/2 == isla.getX() + isla.getAncho()/2;
-			boolean tocaIzquierda = esqueleto.getX() - esqueleto.getAncho()/2 == isla.getX() - isla.getAncho()/2;
-			if(tocaDerecha || tocaIzquierda){
-				esqueleto.cambiarDireccion();
-				esqueleto.mover();
+		//MOVIMIENTO MONEDA
+		for (int i = 0; i < monedas.length; i++) {
+			Moneda moneda = monedas[i];
+			if (monedaEstaTocandoAlgunaIsla(islas, moneda) != null) {
+				moneda.mover();
 			}else{
-				esqueleto.mover();
+				moneda.caer();
 			}
-		}else{
-			esqueleto.caer();
+		}
+		//MOVIMIENTO ESQUELETO
+		for (int i = 0; i < esqueletos.length; i++) {
+			Esqueleto esqueleto = esqueletos[i];
+			if(esqueletoEstaTocandoAlgunaIsla(islas, esqueleto) != null){
+				Isla isla = esqueletoEstaTocandoAlgunaIsla(islas,esqueleto); //Guarda la isla que el esqueleto toco
+	
+				boolean tocaDerecha = esqueleto.getX() + esqueleto.getAncho()/2 == isla.getX() + isla.getAncho()/2;
+				boolean tocaIzquierda = esqueleto.getX() - esqueleto.getAncho()/2 == isla.getX() - isla.getAncho()/2;
+				if(tocaDerecha || tocaIzquierda){
+					esqueleto.cambiarDireccion();
+					esqueleto.mover();
+				}else{
+					esqueleto.mover();
+				}
+			}else{
+				esqueleto.caer();
+			}
 		}
 
 		if(caballeroEstaTocandoAlgunaIsla(islas)==null){
@@ -98,17 +124,10 @@ public class Juego extends InterfaceJuego
 				boladefuego.dibujarBolaDeFuego(entorno);
 				boladefuego.mover();
 			}
-			if(boladefuego.x == esqueleto.getX() && boladefuego.y == esqueleto.getY()){
-				esqueleto = null;
-			}
 		}
 		
 		//SECCION DE COFRE Y MONEDAS
 		
-		if(faltaAlgunaMoneda(cofre)){
-			añadirMonedas(cofre);
-			dibujarMonedas(cofre);
-		}
 		
 	}
 	public void generarIslas(){
@@ -138,15 +157,18 @@ public class Juego extends InterfaceJuego
 			islas[i].dibujarIsla(entorno);
 		}
 	}
-	public Isla esqueletoEstaTocandoAlgunaIsla(Isla[] islas){
+	public Isla esqueletoEstaTocandoAlgunaIsla(Isla[] islas, Esqueleto esqueleto){
 		for (int i = 0; i < islas.length; i++) {
 			Isla isla = islas[i];
 			if(esqueleto.tocaAbajo(isla)){
 				return isla;
 			}
 		}
+	
+		
 		return null;
 	}
+	
 	public Isla caballeroEstaTocandoAlgunaIsla(Isla[] islas){
 		for (int i = 0; i < islas.length; i++) {
 			Isla isla = islas[i];
@@ -156,26 +178,29 @@ public class Juego extends InterfaceJuego
 		}
 		return null;
 	}
-	public boolean faltaAlgunaMoneda(Cofre cofre){
-		for (int i = 0; i < cofre.monedas.length; i++) {
-			if(cofre.monedas[i] == null){
-				return true;
+	public Isla monedaEstaTocandoAlgunaIsla(Isla[] islas,Moneda moneda){
+		for (int i = 0; i < islas.length; i++) {
+			Isla isla = islas[i];
+			if (moneda.tocaAbajo(isla)) {
+				return isla;
 			}
 		}
-		return false;
+		return null;
 	}
-	public void añadirMonedas(Cofre cofre){
-		for (int i = 0; i < cofre.monedas.length; i++) {
-			if(cofre.monedas[i] == null){
-				cofre.monedas[i] = new Moneda(400, 50, 20,20,3);
-			}
+	public void dibujarEsqueletos(Esqueleto[] esqueletos){
+		for (int i = 0; i < esqueletos.length; i++) {
+			esqueletos[i].dibujarEsqueleto(entorno);
 		}
 	}
-	public void dibujarMonedas(Cofre cofre){
-		for (int i = 0; i < cofre.monedas.length; i++) {
-			cofre.monedas[i].dibujarMoneda(entorno);
+	public void dibujarMonedas(Moneda[] monedas){
+		for (int i = 0; i < monedas.length; i++) {
+			monedas[i].dibujarMoneda(entorno);
 		}
 	}
+	
+	
+	
+	
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
