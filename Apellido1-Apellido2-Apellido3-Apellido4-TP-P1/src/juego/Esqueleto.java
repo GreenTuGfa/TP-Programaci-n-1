@@ -2,40 +2,37 @@ package juego;
 
 import java.awt.Color;
 import java.awt.Image;
-
 import entorno.Entorno;
 import entorno.Herramientas;
 
-public class Caballero {
+public class Esqueleto {
     
-    public BolaDeFuego boladefuego;
-    private Image imagenCaballero;
-    public int alto,ancho;
     private int x,y;
+    private int ancho,alto;
     private int velocidad;
-
-    public Caballero(int x, int y, int velocidad,int ancho, int alto){
+    Image imagenEsqueleto;
+    public Esqueleto(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
         this.y = y;
-        this.velocidad = velocidad;
         this.ancho = ancho;
         this.alto = alto;
-        this.imagenCaballero = Herramientas.cargarImagen("images/caballero.png");
-        
+        this.velocidad = velocidad;
+        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto.png");
     }
 
-    public void moverDerecha(){
-        this.x = this.x + velocidad;
-    }
-    public void moverIzquierda(){
-        this.x = this.x - velocidad;
-    }
     public void saltar(){
-        this.y = this.y - 150;
+        this.y = this.y - velocidad;
     }
     public void caer(){
         
         this.y = this.y + velocidad;
+    }
+    public void mover(){
+        this.x = this.x + this.velocidad;
+    }
+    public void cambiarDireccion(){
+        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto1.jpg");
+        this.velocidad = this.velocidad *(-1);
     }
     public boolean tocaAbajo(Isla isla){
         boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
@@ -43,12 +40,11 @@ public class Caballero {
         return tocaY && tocaX;
     }
 
-    public void dibujarCaballero(Entorno entorno){
-        //entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
-        entorno.dibujarImagen(this.imagenCaballero, this.x, this.y, 0, 0.07);
+    public void dibujarEsqueleto(Entorno entorno){
+        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.WHITE);
     }
 
-    ////////Setter y Getter///////
+    //Setter y Getters
     //Getters
     public int getX(){
         return this.x;
@@ -59,9 +55,13 @@ public class Caballero {
     public int getVelocidad(){
         return this.velocidad;
     }
-    public Image getImagenCaballero(){
-        return this.imagenCaballero;
+    public int getAncho(){
+        return this.ancho;
     }
+    public int getAlto(){
+        return this.alto;
+    }
+    
 
     //Setters
     public void setX(int x){
