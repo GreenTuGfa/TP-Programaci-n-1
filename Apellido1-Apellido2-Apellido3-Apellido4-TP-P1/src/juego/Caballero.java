@@ -31,21 +31,31 @@ public class Caballero {
         this.x = this.x - velocidad;
     }
     public void saltar(){
-        this.y = this.y - velocidad*2;
+        this.y = this.y - 150;
     }
     public void caer(){
         
-        this.y = this.y + velocidad*2;
+        this.y = this.y + velocidad;
     }
     public boolean tocaAbajo(Isla isla){
         boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
         boolean tocaY = this.y + this.alto/2 == isla.getY() - isla.getAlto()/2;
         return tocaY && tocaX;
     }
+    public boolean tocaArriba(Isla isla){
+        boolean tocaX = this.x >= isla.getX() - isla.getAncho()/2 && this.x <= isla.getX() + isla.getAncho()/2;
+        boolean tocaY = this.y + this.alto/2 == isla.getY() + isla.getAlto()/2;
+        return tocaY && tocaX;
+    }
 
+    public boolean tocaMoneda(Moneda moneda){
+        boolean tocaX = this.x >= moneda.x - moneda.ancho/2 && this.x <= moneda.x + moneda.ancho/2;
+        boolean tocaY = this.y >= moneda.y - moneda.alto/2 && this.y <= moneda.y + moneda.alto/2;
+        return tocaX && tocaY;
+    }
     public void dibujarCaballero(Entorno entorno){
-        entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
-        //entorno.dibujarImagen(this.imagenCaballero, this.x, this.y, 0, 0.1);
+        //entorno.dibujarRectangulo(x, y, ancho, alto, 0, Color.RED);
+        entorno.dibujarImagen(this.imagenCaballero, this.x, this.y, 0, 0.07);
     }
 
     ////////Setter y Getter///////
@@ -55,6 +65,12 @@ public class Caballero {
     }
     public int getY(){
         return this.y;
+    }
+    public int getAncho(){
+        return this.ancho;
+    }
+    public int getAlto(){
+        return this.alto;
     }
     public int getVelocidad(){
         return this.velocidad;

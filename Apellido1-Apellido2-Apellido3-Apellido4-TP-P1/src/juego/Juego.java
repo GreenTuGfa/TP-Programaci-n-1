@@ -1,7 +1,11 @@
 package juego;
 
 import entorno.Entorno;
+import entorno.Herramientas;
 import entorno.InterfaceJuego;
+import java.util.Random;
+import java.awt.Color;
+import java.awt.Image;
 
 public class Juego extends InterfaceJuego
 {
@@ -9,6 +13,12 @@ public class Juego extends InterfaceJuego
 	private Entorno entorno;
 	
 	// Variables y métodos propios de cada grupo
+	public Random random = new Random();
+
+
+
+	public boolean sePresionoSaltar = false;
+	public Image imagenFondo; 
 	Cofre cofre;
 	public BolaDeFuego boladefuego;
 	public Moneda[] monedas = new Moneda[3];
@@ -17,29 +27,32 @@ public class Juego extends InterfaceJuego
 	public Esqueleto esqueleto;
 	public Esqueleto[] esqueletos = new Esqueleto[3];
 	boolean confirmar = false;
-
-	int yCaballero = 0;
+	int monedasObtenidasPorCaballero = 0;
+	int monedasObtenidasPorEsqueletos = 0;
+	int EsqueletosEliminados = 0;
+	
+	Image gameover = Herramientas.cargarImagen("images/gameover.jpg");
 	Juego()
 	{
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Al Rescate de los Gnomos", 800, 600);
 		
 		// Inicializar lo que haga falta para el juego
-		esqueletos[0] = new Esqueleto(150,100,20,30,5);
-		esqueletos[1] = new Esqueleto(300,100,20,30,5);
-		esqueletos[2] = new Esqueleto(500,100,20,30,5);
+		imagenFondo = Herramientas.cargarImagen("images/fondo.gif");
 
-		monedas[0] = new Moneda(150, 100, 12, 12, 1);
-		monedas[1] = new Moneda(300, 100, 12, 12, 1);
-		monedas[2] = new Moneda(500, 100, 12, 12, 1);
+		
+		esqueletos[0] = new Esqueleto(70,100,20,30,1);
+		esqueletos[1] = new Esqueleto(300,100,20,30,1);
+		esqueletos[2] = new Esqueleto(680,100,20,30,1);
+		//monedaAncho 12, alto 12;
+		monedas[0] = new Moneda(150, 100, 20, 20, 1);
+		monedas[1] = new Moneda(300, 100, 20, 20, 1);
+		monedas[2] = new Moneda(500, 100, 20, 20, 1);
 
 		generarIslas();
-		cofre = new Cofre(400,50,30,30);
+		cofre = new Cofre(400,65,30,30);
 		caballero = new Caballero(100, 50, 5,20,30);
-		//esqueleto = new Esqueleto(150, 100, 20, 30, 5);
 
-		//hitboxIsla = new Hitbox(200, 550,200,50);
-		//hitboxCaballero = new Hitbox(100, 50, 30, 30);
 
 		// Inicia el juego!
 		this.entorno.iniciar();
@@ -55,82 +68,199 @@ public class Juego extends InterfaceJuego
 	{
 		// Procesamiento de un instante de tiempo
 		
-		dibujarMonedas(monedas);
-		dibujarEsqueletos(esqueletos);
-		dibujarIslas(islas);
-		cofre.dibujarCofre(entorno);
-		//esqueleto.dibujarEsqueleto(entorno);
-		caballero.dibujarCaballero(entorno);
+		//El juego se mantendra funcionando mientras el caballero no sea elminiado
+		if(caballero != null){
+			entorno.dibujarImagen(imagenFondo, 400, 300, 0, 0.8);
+			dibujarMonedas(monedas);
+			dibujarEsqueletos(esqueletos);
+			dibujarIslas(islas);
+			cofre.dibujarCofre(entorno);
+			//esqueleto.dibujarEsqueleto(entorno);
+			caballero.dibujarCaballero(entorno);
 
+			entorno.escribirTexto("Monedas recogidas: " + monedasObtenidasPorCaballero, 50, 50);
+			entorno.cambiarFont("Arial", 18, Color.CYAN);
 
-		//SECCION DE CABALLERO Y ESQUELETO
+			entorno.escribirTexto("Tiempo transcurrido " + entorno.tiempo(), 50, 100);
+			entorno.cambiarFont("Arial", 18, Color.CYAN);
+			//SECCION DE CABALLERO Y ESQUELETO
+			
+			boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
+			boolean estaPresionadaIzquierda = entorno.estaPresionada(entorno.TECLA_IZQUIERDA);
+			
 
-		boolean estaPresionadaDerecha = entorno.estaPresionada(entorno.TECLA_DERECHA);
-		boolean estaPresionadaIzquierda = entorno.estaPresionada(entorno.TECLA_IZQUIERDA);
-		
+			//MOVIMIENTO MONEDA (Gnomo)
+			for (int i = 0; i < monedas.length; i++) {
+				
+				Moneda moneda = monedas[i];
 
-		//MOVIMIENTO MONEDA
-		for (int i = 0; i < monedas.length; i++) {
-			Moneda moneda = monedas[i];
-			if (monedaEstaTocandoAlgunaIsla(islas, moneda) != null) {
-				moneda.mover();
-			}else{
-				moneda.caer();
-			}
-		}
-		//MOVIMIENTO ESQUELETO
-		for (int i = 0; i < esqueletos.length; i++) {
-			Esqueleto esqueleto = esqueletos[i];
-			if(esqueletoEstaTocandoAlgunaIsla(islas, esqueleto) != null){
-				Isla isla = esqueletoEstaTocandoAlgunaIsla(islas,esqueleto); //Guarda la isla que el esqueleto toco
+				
+				if(monedas[i] != null){
+					
+					//Si se esta tocando alguna isla..
+					if (monedaEstaTocandoAlgunaIsla(islas, moneda) != null) {
+						
+						//La direccion a la que se mueve la moneda, se indica mediante numeros. (1 == izquierda) (0 == derecha)
+						if(moneda.direccion == 1){
+							moneda.moverIzquierda();
+						}else{
+							moneda.moverDerecha();
+						}
+					/*
+					 * La direccion a la que se mueve la moneda es aleatoria, y se decide mientras la misma cae.
+					 * 	Esto es devido a que si la moneda decidiese la direccion a la que se deve mover mientras esta
+					 * 		tocando alguna isla, la misma estaria cambiando todo le tiempo.
+					 */
+					}else{
+						
+						moneda.direccionAleatoria();
+						moneda.caer();
+					}
+					//Si se supera el margen de la pantalla se elimina la moneda
+					if(moneda.y >= 600){
+						monedas[i] = null;
+					}
+					/*
+					 * Las monedas podran ser recogidas por el caballero, unicamente si se encuentran por la mitad inferior del entorno.
+					 * 	Es decir, se podran recoger unicamente en las islas inferiores. Se evito utilizar metodos que comprueben si 
+					 * 	la moneda o el caballero se encuentran tocando las islas inferiores, debido a que de hacerlo, no se podrian 
+					 * 	recoger las monedas que estan cayendo en el aire.
+					 */
+					if(caballero.tocaMoneda(moneda) && moneda.y > 300){ 
+						monedas[i] = null;
+						monedasObtenidasPorCaballero++;
+					}
 	
-				boolean tocaDerecha = esqueleto.getX() + esqueleto.getAncho()/2 == isla.getX() + isla.getAncho()/2;
-				boolean tocaIzquierda = esqueleto.getX() - esqueleto.getAncho()/2 == isla.getX() - isla.getAncho()/2;
-				if(tocaDerecha || tocaIzquierda){
-					esqueleto.cambiarDireccion();
-					esqueleto.mover();
 				}else{
-					esqueleto.mover();
+					generarMonedas(monedas);
+					dibujarMonedas(monedas);
+				}
+
+			}
+			//MOVIMIENTO ESQUELETO
+			for (int i = 0; i < esqueletos.length; i++) {
+
+				Esqueleto esqueleto = esqueletos[i];
+
+				if(esqueletos[i] != null){
+
+					if(esqueletos[i].getY() >= 600){
+						esqueletos[i] = null;
+					}
+					if(esqueletos[i].getY() < 600){
+						esqueletos[i] = null;
+					}
+					if(esqueletoEstaTocandoAlgunaIsla(islas, esqueleto) != null){
+						Isla isla = esqueletoEstaTocandoAlgunaIsla(islas,esqueleto); //Guarda la isla que el esqueleto toco
+			
+						//Comprueban si el esqueleto llego al borde derecho o izquierdo de la isla
+						boolean tocaDerecha = esqueleto.getX() + esqueleto.getAncho()/2 == isla.getX() + isla.getAncho()/2;
+						boolean tocaIzquierda = esqueleto.getX() - esqueleto.getAncho()/2 == isla.getX() - isla.getAncho()/2;
+
+
+						if(tocaDerecha || tocaIzquierda){
+							esqueleto.cambiarDireccion();
+							esqueleto.mover(); //Es importante para que el esqueleto reactive su movimiento al llegar a un borde, y no se quede quieto en el mismo.
+						}else{
+							esqueleto.mover();
+						}
+					}else{
+						esqueleto.caer();
+					}
+					//Comprueba si el esqueleto toca alguna moneda
+					for (int j = 0; j < monedas.length; j++) {
+
+						Moneda moneda = monedas[i];
+
+						if(esqueleto.tocaMoneda(moneda)){
+
+							monedas[i] = null;
+							monedasObtenidasPorEsqueletos++;
+						}
+					}
+					//Comprueba si el esqueleto toca al caballero
+					if(esqueleto.tocaCaballero(caballero)){
+						caballero = null;
+					}
+				}else{
+					generarEsqueleto(esqueletos);
+					dibujarEsqueletos(esqueletos);
+				}
+		
+			}
+
+
+			//MOVIMIENTO CABALLERO
+			if(caballeroEstaTocandoAlgunaIsla(islas)!=null){
+				
+				if(entorno.estaPresionada(entorno.TECLA_ESPACIO) && sePresionoSaltar == false){
+					caballero.saltar();
+					sePresionoSaltar = true;
+					
+				}
+				if(entorno.seLevanto(entorno.TECLA_ESPACIO)){
+					sePresionoSaltar = false;
 				}
 			}else{
-				esqueleto.caer();
+				caballero.caer();
+				
 			}
-		}
-
-		if(caballeroEstaTocandoAlgunaIsla(islas)==null){
-			caballero.caer();
-			if(entorno.estaPresionada(entorno.TECLA_ESPACIO)){
-				caballero.saltar();
-			}
-		}
-
-		if(estaPresionadaDerecha){
-			caballero.moverDerecha();
-		}
-		if (estaPresionadaIzquierda) {
-			caballero.moverIzquierda();
-		}
-		if (entorno.estaPresionada(entorno.TECLA_ESPACIO)) {
 			
-			caballero.saltar();
-		}
-		
-		if(entorno.sePresiono(entorno.TECLA_CTRL)){
-			confirmar = true;
-			boladefuego = new BolaDeFuego(caballero.getX(), caballero.getY(),10, 10, 10);
-		}
-		if(confirmar == true){
-			if(boladefuego.x <= entorno.ancho()){
-				boladefuego.dibujarBolaDeFuego(entorno);
-				boladefuego.mover();
+			if(caballero.getY() >= 600){
+				caballero = null;
 			}
+			
+
+			if(estaPresionadaDerecha){
+				caballero.moverDerecha();
+			}
+			if (estaPresionadaIzquierda) {
+				caballero.moverIzquierda();
+			}
+			
+			//SECCION BOLA DE FUEGO
+
+			if(entorno.sePresiono(entorno.TECLA_CTRL) && confirmar == false){
+
+				//Esta variable servira para controlar mas eficientemento los momentos en los que se puede dibujar o no la bola de fuego
+				confirmar = true;
+				boladefuego = new BolaDeFuego(caballero.getX(), caballero.getY(),10, 10, 10);
+
+			}
+
+			if(confirmar == true){
+
+				if(boladefuego.x <= entorno.ancho()){
+					boladefuego.dibujarBolaDeFuego(entorno);
+					boladefuego.mover();
+
+				}else{
+					confirmar = false; //Cuando la bola de fuego supera el margen del entorno, se nos permite volver a generar otra bola de fuego
+				}
+				//Seccion dedicada a comprobar si la bola de fuego impacta con algun esqueleto
+				for (int i = 0; i < esqueletos.length; i++) {
+
+					Esqueleto esqueleto = esqueletos[i];
+
+					if(boladefuego.tocaEsqueleto(esqueleto)){
+
+						esqueletos[i] = null;
+						confirmar = false; //Al eliminar un esuqueleto, se nos permite volver a generar otra bola de fuego
+					}
+				}
+			}
+		}else{
+			entorno.dibujarImagen(gameover, 400, 300, 0, 1);
 		}
 		
-		//SECCION DE COFRE Y MONEDAS
+
 		
 		
 	}
 	public void generarIslas(){
+
+		//Islas ordenadas de islas inferiores a islas superiores
+		
 		islas[0] = new Isla(100, 500, 100, 30);
 		islas[1] = new Isla(250, 500, 100, 30);
 		islas[2] = new Isla(400, 500, 100, 30);
@@ -157,6 +287,17 @@ public class Juego extends InterfaceJuego
 			islas[i].dibujarIsla(entorno);
 		}
 	}
+	public static int generarNumeroAleatorio(Random random) {
+        // Generamos un número aleatorio en el rango [0, 700] (350 números en 0-349 y 351 en 450-800)
+        int indice = random.nextInt(701); // 701 porque queremos un número entre 0 y 700 inclusive
+
+        // Mapeamos el índice al rango adecuado
+        if (indice < 350) {
+            return indice; // Corresponde al rango 0-349
+        } else {
+            return 450 + (indice - 350); // Corresponde al rango 450-800
+        }
+    }
 	public Isla esqueletoEstaTocandoAlgunaIsla(Isla[] islas, Esqueleto esqueleto){
 		for (int i = 0; i < islas.length; i++) {
 			Isla isla = islas[i];
@@ -178,6 +319,15 @@ public class Juego extends InterfaceJuego
 		}
 		return null;
 	}
+	public Isla caballeroChocaConAlgunaIsla(Isla[] islas){
+		for (int i = 0; i < islas.length; i++) {
+			Isla isla = islas[i];
+			if(caballero.tocaArriba(isla)){
+				return isla;
+			}
+		}
+		return null;
+	}
 	public Isla monedaEstaTocandoAlgunaIsla(Isla[] islas,Moneda moneda){
 		for (int i = 0; i < islas.length; i++) {
 			Isla isla = islas[i];
@@ -187,14 +337,43 @@ public class Juego extends InterfaceJuego
 		}
 		return null;
 	}
+	public boolean faltaAlgunaMoneda(Moneda[] monedas){
+		for (int i = 0; i < monedas.length; i++) {
+			if(monedas[i] != null){
+				return true;
+			}
+		}
+		return false;
+	}
+	public void generarMonedas(Moneda[] monedas){
+		for (int i = 0; i < monedas.length; i++) {
+			if(monedas[i] == null){
+				monedas[i] = new Moneda(cofre.x, cofre.y, 20, 20, 1);
+			}
+		}
+	}
+	public void generarEsqueleto(Esqueleto[] esqueletos){
+		//int cordenadaX = 0;
+		for (int i = 0; i < esqueletos.length; i++) {
+			if(esqueletos[i] == null){
+				int cordenadaX = generarNumeroAleatorio(random);
+				System.out.println(cordenadaX);
+				esqueletos[i] = new Esqueleto(cordenadaX, cofre.y, 20, 30, 1);
+			}
+		}
+	}
 	public void dibujarEsqueletos(Esqueleto[] esqueletos){
 		for (int i = 0; i < esqueletos.length; i++) {
-			esqueletos[i].dibujarEsqueleto(entorno);
+			if(esqueletos[i] !=  null){
+				esqueletos[i].dibujarEsqueleto(entorno);
+			}
 		}
 	}
 	public void dibujarMonedas(Moneda[] monedas){
 		for (int i = 0; i < monedas.length; i++) {
-			monedas[i].dibujarMoneda(entorno);
+			if(monedas[i] != null){
+				monedas[i].dibujarMoneda(entorno);
+			}
 		}
 	}
 	

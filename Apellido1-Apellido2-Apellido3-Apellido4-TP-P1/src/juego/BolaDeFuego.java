@@ -6,10 +6,11 @@ import entorno.Herramientas;
 
 public class BolaDeFuego {
 
-    Image imagenboladefuego = Herramientas.cargarImagen("images/boladefuego1.gif");
+    Image imagenboladefuego = Herramientas.cargarImagen("images/boladefuego4.gif");
     int x,y;
     int ancho,alto;
     int velocidad;
+    int direccion = 0;
 
     public BolaDeFuego(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
@@ -26,5 +27,16 @@ public class BolaDeFuego {
     public void mover(){
         this.x = this.x + velocidad;
 
+    }
+    public void moverDerecha(){
+        this.x = this.x + velocidad;
+    }
+    public void moverIzquierda(){
+        this.x = this.x - velocidad;
+    }
+    public boolean tocaEsqueleto(Esqueleto esqueleto){
+        boolean tocaX = this.x >= esqueleto.getX() - esqueleto.getAncho()/2 && this.x <= esqueleto.getX() + esqueleto.getAncho()/2;
+        boolean tocaY = this.y >= esqueleto.getY() - esqueleto.getAlto()/2 && this.y <= esqueleto.getY() + esqueleto.getAlto()/2;
+        return tocaX && tocaY;
     }
 }
