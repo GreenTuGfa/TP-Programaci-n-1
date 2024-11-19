@@ -10,6 +10,7 @@ public class BolaDeFuego {
     int x,y;
     int ancho,alto;
     int velocidad;
+    int direccion = 0;
 
     public BolaDeFuego(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
@@ -17,7 +18,6 @@ public class BolaDeFuego {
         this.ancho = ancho;
         this.alto = alto;
         this.velocidad = velocidad;
-        //this.imagenboladefuego = entorno.Herramientas.cargarImagen("src/images/boladefuego.gif");
     }
     public void dibujarBolaDeFuego(Entorno entorno){
         entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.ORANGE);
@@ -32,5 +32,10 @@ public class BolaDeFuego {
     }
     public void moverIzquierda(){
         this.x = this.x - velocidad;
+    }
+    public boolean tocaEsqueleto(Esqueleto esqueleto){
+        boolean tocaX = this.x >= esqueleto.getX() - esqueleto.getAncho()/2 && this.x <= esqueleto.getX() + esqueleto.getAncho()/2;
+        boolean tocaY = this.y >= esqueleto.getY() - esqueleto.getAlto()/2 && this.y <= esqueleto.getY() + esqueleto.getAlto()/2;
+        return tocaX && tocaY;
     }
 }
