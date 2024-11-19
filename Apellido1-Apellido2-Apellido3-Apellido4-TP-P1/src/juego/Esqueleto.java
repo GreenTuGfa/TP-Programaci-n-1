@@ -10,6 +10,8 @@ public class Esqueleto {
     private int x,y;
     private int ancho,alto;
     private int velocidad;
+    boolean estaVivo;  // Atributo que indica si el esqueleto está vivo
+
     Image imagenEsqueleto;
     public Esqueleto(int x, int y, int ancho, int alto, int velocidad){
         this.x = x;
@@ -18,6 +20,13 @@ public class Esqueleto {
         this.alto = alto;
         this.velocidad = velocidad;
         this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto.png");
+    }
+    public Esqueleto() {
+        estaVivo = true;  // Inicialmente el esqueleto está vivo
+    }
+
+    public void morir() {
+        estaVivo = false;  // Cambia el estado a muerto cuando el esqueleto es destruido
     }
 
     public void saltar(){
@@ -31,7 +40,7 @@ public class Esqueleto {
         this.x = this.x + this.velocidad;
     }
     public void cambiarDireccion(){
-        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto1.jpg");
+        this.imagenEsqueleto = Herramientas.cargarImagen("images/esqueleto1.png");
         this.velocidad = this.velocidad *(-1);
     }
     public boolean tocaAbajo(Isla isla){
@@ -85,3 +94,6 @@ public class Esqueleto {
         this.velocidad = velocidad;
     }
 }
+
+
+

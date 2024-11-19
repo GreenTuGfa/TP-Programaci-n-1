@@ -49,7 +49,7 @@ public class Moneda {
         return tocaY && tocaX;
     }
     public void dibujarMoneda(Entorno entorno){
-        //entorno.dibujarRectangulo(this.x, this.y, this.ancho, this.alto, 0, Color.YELLOW);
+
         entorno.dibujarImagen(imagen, x, y, 0, 0.15);
     }
 }

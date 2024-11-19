@@ -6,17 +6,18 @@ import entorno.InterfaceJuego;
 import java.util.Random;
 import java.awt.Color;
 import java.awt.Image;
+import java.io.File;
+
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Juego extends InterfaceJuego
 {
 	// El objeto Entorno que controla el tiempo y otros
 	private Entorno entorno;
-	
+	private Musica musicaFondo; // Objeto para la música de fondo	
 	// Variables y métodos propios de cada grupo
 	public Random random = new Random();
-
-
-
 	public boolean sePresionoSaltar = false;
 	public Image imagenFondo; 
 	Cofre cofre;
@@ -25,19 +26,23 @@ public class Juego extends InterfaceJuego
 	public Isla[] islas = new Isla[15];
 	public Caballero caballero;
 	public Esqueleto esqueleto;
-	public Esqueleto[] esqueletos = new Esqueleto[3];
 	boolean confirmar = false;
+	public Esqueleto[] esqueletos = new Esqueleto[3];
 	int monedasObtenidasPorCaballero = 0;
 	int monedasObtenidasPorEsqueletos = 0;
 	int EsqueletosEliminados = 0;
+	boolean juegoTerminado = false; 
 	
 	Image gameover = Herramientas.cargarImagen("images/gameover.jpg");
 	Juego()
 	{
 		// Inicializa el objeto entorno
 		this.entorno = new Entorno(this, "Al Rescate de los Gnomos", 800, 600);
+		 // Cargar la música de fondo (indica la ruta al archivo .wav)
+        musicaFondo = new Musica("src/sounds/Alrescate.wav");
+        musicaFondo.reproducir(); // Comienza la música al inicio del juego
 		
-		// Inicializar lo que haga falta para el juego
+        // Inicializar lo que haga falta para el juego
 		imagenFondo = Herramientas.cargarImagen("images/fondo.gif");
 
 		
@@ -51,7 +56,7 @@ public class Juego extends InterfaceJuego
 
 		generarIslas();
 		cofre = new Cofre(400,65,30,30);
-		caballero = new Caballero(100, 50, 5,20,30);
+		caballero = new Caballero(100, 50, 3,20,30);
 
 
 		// Inicia el juego!
@@ -66,6 +71,10 @@ public class Juego extends InterfaceJuego
 	 */
 	public void tick()
 	{
+	    if (juegoTerminado) {
+	        entorno.dibujarImagen(gameover, 400, 300, 0, 1);
+	        return; // Evita que el resto del código se ejecute
+	    }
 		// Procesamiento de un instante de tiempo
 		
 		//El juego se mantendra funcionando mientras el caballero no sea elminiado
@@ -129,6 +138,7 @@ public class Juego extends InterfaceJuego
 					if(caballero.tocaMoneda(moneda) && moneda.y > 300){ 
 						monedas[i] = null;
 						monedasObtenidasPorCaballero++;
+						reproducirSonidoMoneda();
 					}
 	
 				}else{
@@ -147,7 +157,7 @@ public class Juego extends InterfaceJuego
 					if(esqueletos[i].getY() >= 600){
 						esqueletos[i] = null;
 					}
-					if(esqueletos[i].getY() < 600){
+					if(esqueletos[i].getX() < 50){
 						esqueletos[i] = null;
 					}
 					if(esqueletoEstaTocandoAlgunaIsla(islas, esqueleto) != null){
@@ -169,11 +179,8 @@ public class Juego extends InterfaceJuego
 					}
 					//Comprueba si el esqueleto toca alguna moneda
 					for (int j = 0; j < monedas.length; j++) {
-
 						Moneda moneda = monedas[i];
-
 						if(esqueleto.tocaMoneda(moneda)){
-
 							monedas[i] = null;
 							monedasObtenidasPorEsqueletos++;
 						}
@@ -181,8 +188,11 @@ public class Juego extends InterfaceJuego
 					//Comprueba si el esqueleto toca al caballero
 					if(esqueleto.tocaCaballero(caballero)){
 						caballero = null;
+						juegoTerminado = true;
+			            reproducirSonidoGameOver();
+						
 					}
-				}else{
+				}else{ // el else se encarga de regenerar esqueletos
 					generarEsqueleto(esqueletos);
 					dibujarEsqueletos(esqueletos);
 				}
@@ -191,20 +201,18 @@ public class Juego extends InterfaceJuego
 
 
 			//MOVIMIENTO CABALLERO
-			if(caballeroEstaTocandoAlgunaIsla(islas)!=null){
-				
-				if(entorno.estaPresionada(entorno.TECLA_ESPACIO) && sePresionoSaltar == false){
-					caballero.saltar();
-					sePresionoSaltar = true;
-					
-				}
-				if(entorno.seLevanto(entorno.TECLA_ESPACIO)){
-					sePresionoSaltar = false;
-				}
-			}else{
-				caballero.caer();
-				
+			if (caballeroEstaTocandoAlgunaIsla(islas) != null) {
+			    // Permitir salto solo si no está en el aire
+			    if (entorno.estaPresionada(entorno.TECLA_ESPACIO) && !caballero.isSaltando()) {
+			        caballero.saltar();
+			        reproducirSonidoSalto();
+			    }
+			} else {
+			    caballero.caer(); // Si no está tocando una isla, cae
 			}
+
+			// Actualizar posición del caballero durante el salto
+			caballero.actualizarSalto(); 
 			
 			if(caballero.getY() >= 600){
 				caballero = null;
@@ -218,45 +226,102 @@ public class Juego extends InterfaceJuego
 				caballero.moverIzquierda();
 			}
 			
-			//SECCION BOLA DE FUEGO
+			 // SECCIÓN BOLA DE FUEGO
+	        if (entorno.sePresiono(entorno.TECLA_CTRL) && !confirmar) {
+	            confirmar = true;
+	            int direccionDisparo = caballero.getDireccion(); 
+	            boladefuego = new BolaDeFuego(caballero.getX(), caballero.getY(), 10, 10, 10, direccionDisparo);
+	            reproducirSonidoBolaDeFuego();
+	        }
 
-			if(entorno.sePresiono(entorno.TECLA_CTRL) && confirmar == false){
+	        if (confirmar) {
+	            // Mueve y dibuja la bola de fuego
+	            boladefuego.mover();
+	            if (boladefuego.x >= 0 && boladefuego.x <= entorno.ancho()) {
+	                boladefuego.dibujarBolaDeFuego(entorno);
+	            } else {
+	                confirmar = false; 
+	            }
 
-				//Esta variable servira para controlar mas eficientemento los momentos en los que se puede dibujar o no la bola de fuego
-				confirmar = true;
-				boladefuego = new BolaDeFuego(caballero.getX(), caballero.getY(),10, 10, 10);
-
-			}
-
-			if(confirmar == true){
-
-				if(boladefuego.x <= entorno.ancho()){
-					boladefuego.dibujarBolaDeFuego(entorno);
-					boladefuego.mover();
-
-				}else{
-					confirmar = false; //Cuando la bola de fuego supera el margen del entorno, se nos permite volver a generar otra bola de fuego
-				}
-				//Seccion dedicada a comprobar si la bola de fuego impacta con algun esqueleto
-				for (int i = 0; i < esqueletos.length; i++) {
-
-					Esqueleto esqueleto = esqueletos[i];
-
-					if(boladefuego.tocaEsqueleto(esqueleto)){
-
-						esqueletos[i] = null;
-						confirmar = false; //Al eliminar un esuqueleto, se nos permite volver a generar otra bola de fuego
-					}
-				}
-			}
-		}else{
-			entorno.dibujarImagen(gameover, 400, 300, 0, 1);
+	            // Sección dedicada a comprobar si la bola de fuego impacta con algún esqueleto
+	            for (int i = 0; i < esqueletos.length; i++) {
+	                Esqueleto esqueleto = esqueletos[i];
+	                if (boladefuego.tocaEsqueleto(esqueleto)) {
+	                    esqueletos[i] = null; 
+	                    confirmar = false;
+	                    reproducirSonidoEliminarEsqueleto();
+	                }
+	            }
+	        }
+	        
+	        // En caso de que el caballero haya sido eliminado
+	        if (caballero == null && !juegoTerminado) {
+	            juegoTerminado = true;
+	            reproducirSonidoGameOver();
+	        }
 		}
-		
-
-		
-		
 	}
+	
+	
+	
+	//SONIDOS
+	
+	private void reproducirSonidoSalto() {
+	    try {
+	        File sonido = new File("src/sounds/Salto.wav"); 
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(sonido));
+	        clip.start();
+	    } catch (Exception e) {
+	        e.printStackTrace(); 
+	    }
+	}
+	
+	private void reproducirSonidoMoneda() {
+	    try {
+	        File sonido = new File("src/sounds/moneda.wav");
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(sonido));
+	        clip.start();
+	    } catch (Exception e) {
+	        e.printStackTrace(); 
+	    }
+	}
+
+	
+	private void reproducirSonidoBolaDeFuego() {
+	    try {
+	        File sonido = new File("src/sounds/Fuegodisparo.wav"); 
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(sonido));
+	        clip.start();
+	    } catch (Exception e) {
+	        e.printStackTrace(); 
+	    }
+	}
+	
+	private void reproducirSonidoEliminarEsqueleto() {
+	    try {
+	        File sonido = new File("src/sounds/eliminacionEsqueleto.wav"); 
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(sonido));
+	        clip.start();
+	    } catch (Exception e) {
+	        e.printStackTrace(); 
+	    }
+	}
+	
+	private void reproducirSonidoGameOver() {
+	    try {
+	        File sonido = new File("src/sounds/gameover.wav"); 
+	        Clip clip = AudioSystem.getClip();
+	        clip.open(AudioSystem.getAudioInputStream(sonido));
+	        clip.start();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
 	public void generarIslas(){
 
 		//Islas ordenadas de islas inferiores a islas superiores
@@ -352,15 +417,14 @@ public class Juego extends InterfaceJuego
 			}
 		}
 	}
-	public void generarEsqueleto(Esqueleto[] esqueletos){
-		//int cordenadaX = 0;
-		for (int i = 0; i < esqueletos.length; i++) {
-			if(esqueletos[i] == null){
-				int cordenadaX = generarNumeroAleatorio(random);
-				System.out.println(cordenadaX);
-				esqueletos[i] = new Esqueleto(cordenadaX, cofre.y, 20, 30, 1);
-			}
-		}
+	public void generarEsqueleto(Esqueleto[] esqueletos) {
+	    for (int i = 0; i < esqueletos.length; i++) {
+	        if (esqueletos[i] == null) { // Si el esqueleto está eliminado
+	            // Genera un nuevo esqueleto en una posición aleatoria
+	            int cordenadaX = generarNumeroAleatorio(random);
+	            esqueletos[i] = new Esqueleto(cordenadaX, cofre.y, 20, 30, 1);
+	        }
+	    }
 	}
 	public void dibujarEsqueletos(Esqueleto[] esqueletos){
 		for (int i = 0; i < esqueletos.length; i++) {
@@ -378,7 +442,7 @@ public class Juego extends InterfaceJuego
 	}
 	
 	
-	
+	   
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
@@ -386,3 +450,4 @@ public class Juego extends InterfaceJuego
 		Juego juego = new Juego();
 	}
 }
+
