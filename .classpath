@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="Apellido1-Apellido2-Apellido3-Apellido4-TP-P1/src"/>
-	<classpathentry kind="lib" path="Apellido1-Apellido2-Apellido3-Apellido4-TP-P1/entorno.jar"/>
-	<classpathentry kind="output" path="Apellido1-Apellido2-Apellido3-Apellido4-TP-P1/bin"/>
-</classpath>
